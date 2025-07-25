@@ -3,6 +3,7 @@ from .views import QuestionListAPIView
 
 urlpatterns = [
     path('questions/', QuestionListAPIView.as_view(), name='question-list'),
+    
 ]
 
 

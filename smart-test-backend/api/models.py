@@ -1,5 +1,7 @@
+
+
 from django.db import models
-from django.contrib.auth.models import User  # Import the built-in User model
+# from django.contrib.auth.models import User  # ✅ Using built-in User model
 
 class Question(models.Model):
     DIFFICULTY_LEVELS = [
@@ -8,18 +10,18 @@ class Question(models.Model):
         ('hard', 'Hard'),
     ]
 
-    subject = models.CharField(max_length=100)
-    question_text = models.TextField()
-    options = models.JSONField()
-    correct_answer = models.CharField(max_length=1)
+    subject = models.CharField(max_length=100)                     # ✅ Subject like Math, GK
+    question_text = models.TextField()                             # ✅ The question itself
+    options = models.JSONField()                                   # ✅ {"A": "...", "B": "...", ...}
+    correct_answer = models.CharField(max_length=1)                # ✅ A/B/C/D
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_LEVELS, default='medium')
-    correct_count = models.IntegerField(default=0)
-    incorrect_count = models.IntegerField(default=0)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    correct_count = models.IntegerField(default=0)                 # ✅ # of correct attempts
+    incorrect_count = models.IntegerField(default=0)               # ✅ # of wrong attempts
+    #created_by = models.ForeignKey(User, on_delete=models.CASCADE)  # ✅ Link to User (e.g., admin)
+    created_by = models.CharField(max_length=100, default='admin')
 
     def __str__(self):
         return self.question_text
-
 
 
 

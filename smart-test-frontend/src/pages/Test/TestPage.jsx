@@ -1,100 +1,222 @@
-// File: D:\SmartTestProject\smart-test-frontend\src\pages\Test\TestPage.jsx
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-
-const TestPage = () => {
+function TestPage() {
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/questions/")
+    axios.get('http://127.0.0.1:8000/api/questions/')
       .then(response => setQuestions(response.data))
-      .catch(error => console.error("Error fetching questions:", error));
+      .catch(error => console.error('Error fetching questions:', error));
   }, []);
 
-  const handleOptionChange = (questionId, selectedOption) => {
-    if (!submitted) {
-      setSelectedAnswers({
-        ...selectedAnswers,
-        [questionId]: selectedOption
-      });
-    }
+  const handleOptionChange = (questionId, optionKey) => {
+    setSelectedAnswers({ ...selectedAnswers, [questionId]: optionKey });
   };
 
   const handleSubmit = () => {
     setSubmitted(true);
   };
 
-  const getOptionClass = (question, option) => {
-    const selected = selectedAnswers[question.id];
-    if (!submitted) return "bg-white";
-
-    if (option === question.correct_answer) {
-      return "bg-green-200";
-    }
-    if (option === selected && option !== question.correct_answer) {
-      return "bg-red-200";
-    }
-
-    return "bg-white";
-  };
-
   return (
-    <div className="min-h-screen py-10 px-4" style={{
-      background: "linear-gradient(to right, #e0c3fc, #8ec5fc)"  // Gradient light purple
-    }}>
-      <div className="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-xl">
-        <h1 className="text-3xl font-bold mb-8 text-center text-purple-700">Smart Test Platform</h1>
-        
-        {questions.map((question, index) => (
-          <div key={question.id} className="mb-8 p-6 border border-purple-300 rounded-xl shadow-md bg-white">
-            <h2 className="text-xl font-semibold mb-2">{index + 1}. {question.text}</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Subject: {question.subject} | Difficulty: {question.difficulty}
-            </p>
+    <div className="p-4 max-w-3xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-center">Mock Test</h1>
 
+      {questions.map((question, index) => {
+        const options = typeof question.options === 'string'
+          ? JSON.parse(question.options)
+          : question.options;
+
+        return (
+          <div key={question.id} className="bg-white p-4 mb-6 rounded-2xl shadow-md">
+            <h2 className="text-lg font-semibold mb-3">
+              Q{index + 1}. {question.question_text}
+            </h2>
             <div className="space-y-2">
-              {question.options.map((option, i) => (
-                <label
-                  key={i}
-                  className={`block p-3 rounded-md cursor-pointer border ${getOptionClass(question, option)}`}
-                >
-                  <input
-                    type="radio"
-                    name={`question-${question.id}`}
-                    value={option}
-                    checked={selectedAnswers[question.id] === option}
-                    onChange={() => handleOptionChange(question.id, option)}
-                    className="mr-2"
-                    disabled={submitted}
-                  />
-                  {option}
-                </label>
-              ))}
+              {Object.entries(options).map(([key, value]) => {
+                const isSelected = selectedAnswers[question.id] === key;
+                const isCorrect = submitted && question.correct_answer === key;
+                const isWrong = submitted && isSelected && question.correct_answer !== key;
+
+                return (
+                  <label
+                    key={key}
+                    className={`block p-3 rounded-xl border cursor-pointer transition duration-300
+                      ${isCorrect ? 'bg-green-100 border-green-500' : ''}
+                      ${isWrong ? 'bg-red-100 border-red-500' : ''}
+                      ${!isCorrect && !isWrong ? 'hover:bg-gray-100' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name={`question-${question.id}`}
+                      value={key}
+                      checked={isSelected}
+                      onChange={() => handleOptionChange(question.id, key)}
+                      className="mr-2"
+                      disabled={submitted}
+                    />
+                    <span className="font-medium">{key}. </span>{value}
+                  </label>
+                );
+              })}
             </div>
           </div>
-        ))}
+        );
+      })}
 
-        {!submitted ? (
-          <button
-            onClick={handleSubmit}
-            className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 transition block mx-auto mt-6"
-          >
-            Submit
-          </button>
-        ) : (
-          <p className="text-center text-green-600 text-lg font-semibold mt-6">
-            Answers submitted successfully!
-          </p>
-        )}
-      </div>
+      {!submitted ? (
+        <button
+          onClick={handleSubmit}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl shadow-md"
+        >
+          Submit
+        </button>
+      ) : (
+        <div className="mt-4 text-center text-green-600 font-semibold">
+          Answers submitted! ✅
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default TestPage;
+
+
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+
+// const TestPage = () => {
+//   const [questions, setQuestions] = useState([]);
+//   const [answers, setAnswers] = useState({});
+//   const [result, setResult] = useState(null);
+
+//   useEffect(() => {
+//     axios
+//       .get("http://127.0.0.1:8000/api/questions/")
+//       .then((response) => {
+//         setQuestions(response.data);
+//       })
+//       .catch((error) => {
+//         console.error("Error fetching questions:", error);
+//       });
+//   }, []);
+
+//   const handleOptionChange = (questionId, selectedOption) => {
+//     setAnswers({ ...answers, [questionId]: selectedOption });
+//   };
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     let correct = 0;
+//     let wrong = 0;
+
+//     questions.forEach((question) => {
+//       const userAnswer = answers[question.id];
+//       const correctOption = question.options.find((opt) => opt.is_correct)?.text;
+
+//       if (userAnswer === correctOption) {
+//         correct++;
+//       } else {
+//         wrong++;
+//       }
+//     });
+
+//     setResult({ correct, wrong });
+//   };
+
+//   return (
+//     <div className="min-h-screen py-10 px-4 bg-gradient-to-br from-purple-100 via-violet-200 to-pink-100">
+//       <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl p-8">
+//         <h2 className="text-3xl font-bold mb-6 text-center text-purple-700">📝 Smart Test Platform</h2>
+
+//         {questions.length === 0 ? (
+//           <p className="text-red-500 text-center">No questions found.</p>
+//         ) : (
+//           <form onSubmit={handleSubmit} className="space-y-10">
+//             {questions.map((question, index) => (
+//               <div
+//                 key={question.id}
+//                 className="bg-gray-100 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+//               >
+//                 <div className="mb-3">
+//                   <h3 className="text-lg font-semibold text-gray-800">
+//                     {index + 1}. {question.question_text}
+//                   </h3>
+
+//                   <div className="text-sm text-gray-600 mt-2 space-y-1 sm:space-y-0 sm:space-x-4 sm:flex">
+//                     <span>📘 Subject: <strong>{question.subject}</strong></span>
+//                     <span>🎯 Difficulty: <strong>{question.difficulty}</strong></span>
+//                     <span>👤 Created By: <strong>{question.created_by || "N/A"}</strong></span>
+//                     <span>✅ Correct: {question.correct_count} | ❌ Wrong: {question.incorrect_count}</span>
+//                   </div>
+//                 </div>
+
+//                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+//                   {question.options.map((option) => {
+//                     const isSelected = answers[question.id] === option.text;
+//                     const isCorrect = option.is_correct;
+//                     const showFeedback = result !== null;
+
+//                     let optionClass = "bg-white border-gray-300 hover:bg-blue-50";
+//                     if (showFeedback && isSelected && isCorrect) {
+//                       optionClass = "bg-green-100 border-green-500";
+//                     } else if (showFeedback && isSelected && !isCorrect) {
+//                       optionClass = "bg-red-100 border-red-500";
+//                     }
+
+//                     return (
+//                       <label
+//                         key={option.id}
+//                         className={`cursor-pointer p-4 rounded-lg border transition-all duration-300 ${optionClass}`}
+//                       >
+//                         <input
+//                           type="radio"
+//                           name={`question-${question.id}`}
+//                           value={option.text}
+//                           checked={answers[question.id] === option.text}
+//                           onChange={() => handleOptionChange(question.id, option.text)}
+//                           className="mr-2"
+//                           disabled={result !== null}
+//                         />
+//                         {option.text}
+//                       </label>
+//                     );
+//                   })}
+//                 </div>
+//               </div>
+//             ))}
+
+//             <div className="text-center mt-8">
+//               <button
+//                 type="submit"
+//                 className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition-transform transform hover:scale-105"
+//               >
+//                 Submit
+//               </button>
+//             </div>
+//           </form>
+//         )}
+
+//         {result && (
+//           <div className="mt-10 text-center bg-gray-50 p-4 rounded-lg shadow-inner">
+//             <p className="text-green-600 text-lg font-semibold mb-2">
+//               ✅ Correct Answers: {result.correct}
+//             </p>
+//             <p className="text-red-600 text-lg font-semibold">
+//               ❌ Wrong Answers: {result.wrong}
+//             </p>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default TestPage;
+
 
 
 
